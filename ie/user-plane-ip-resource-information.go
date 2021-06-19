@@ -147,22 +147,17 @@ func (f *UserPlaneIPResourceInformationFields) UnmarshalBinary(b []byte) error {
 		offset += 16
 	}
 
-	if has6thBit(f.Flags) {
-		n := l
-		if has7thBit(f.Flags) {
-			f.SourceInterface = b[n] & 0x0f
-			n--
-		}
-
-		if l < offset+n {
-			return io.ErrUnexpectedEOF
-		}
-		f.NetworkInstance = string(b[offset:n])
-		return nil
+	if has7thBit(f.Flags) {
+		f.SourceInterface = b[l-1] & 0x0f
+		l--
 	}
 
-	if has7thBit(f.Flags) {
-		f.SourceInterface = b[offset] & 0x0f
+	if has6thBit(f.Flags) {
+		if l <= offset {
+			return io.ErrUnexpectedEOF
+		}
+		f.NetworkInstance = string(b[offset:l])
+		return nil
 	}
 
 	return nil
